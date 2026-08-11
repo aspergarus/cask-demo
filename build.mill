@@ -1,0 +1,27 @@
+package build
+import mill._, scalalib._
+
+import scala.math.Integral.Implicits.infixIntegralOps
+
+object app extends ScalaModule {
+  def scalaVersion = "3.7.3"
+
+  def mvnDeps = Seq(
+    mvn"ch.qos.logback:logback-classic:1.5.18",
+    mvn"com.github.jwt-scala::jwt-upickle:11.0.4",
+    mvn"com.lihaoyi::cask:0.11.3",
+    mvn"com.lihaoyi::scalasql:0.3.0",
+    mvn"com.softwaremill.sttp.client4::core:4.0.0-RC1",
+    mvn"org.mariadb.jdbc:mariadb-java-client:3.5.10",
+    mvn"org.postgresql:postgresql:42.6.0",
+    mvn"redis.clients:jedis:5.1.0",
+  )
+
+  object test extends ScalaTests with TestModule.Utest{
+
+    def mvnDeps = Seq(
+      mvn"com.lihaoyi::utest::0.8.4",
+      mvn"com.lihaoyi::requests::0.9.0",
+    )
+  }
+}

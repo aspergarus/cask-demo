@@ -1,0 +1,47 @@
+services:
+    mariadb:
+        image: mariadb:11.0
+        container_name: baza
+        volumes:
+            - mariadb_data:/var/lib/mysql
+        environment:
+            MYSQL_ROOT_PASSWORD: rootpass
+            MYSQL_DATABASE: common_db
+            MYSQL_USER: regular
+            MYSQL_PASSWORD: mypassword
+        ports:
+            - '10001:3306'
+
+    redis:
+        image: redis:alpine
+        container_name: cask_redis
+        ports:
+            - "6400:6379"
+
+    cask:
+        build: docker
+        working_dir: /app
+        container_name: app_cask
+        volumes:
+            - .:/app
+            - mill-cache:/home/sbtuser/.cache/mill
+            - coursier-cache:/home/sbtuser/.cache/coursier
+        environment:
+            DB_HOST: ${DB_HOST}
+            DB_LOGIN: ${DB_LOGIN}
+            DB_PASS: ${DB_PASS}
+            DB_NAME: ${DB_NAME}
+            REDIS_URL: ${REDIS_URL}
+            REDIS_PORT: ${REDIS_PORT}
+            AUTH0_URL: ${AUTH0_URL}
+        ports:
+            - '10000:8080'
+        command:
+            - ./mill
+            - -w
+            - app.runBackground
+
+volumes:
+    mariadb_data:
+    mill-cache:
+    coursier-cache:

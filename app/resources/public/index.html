@@ -1,0 +1,36 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport"
+          content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>Auth0 Sample App</title>
+</head>
+<body>
+
+    <div id="view-loading">Loading...</div>
+
+    <div id="view-error" hidden></div>
+
+    <div id="view-authenticated" hidden>
+        <p>Logged in as <span id="user-email"></span></p>
+        <h1>User Profile</h1>
+        <pre id="user-profile"></pre>
+        <pre id="user-jwt"></pre>
+        <pre id="user-claims"></pre>
+        <button onclick="client.logout({logoutParams:{returnTo:location.origin}})">Logout</button>
+    </div>
+
+    <div id="view-unauthenticated" hidden>
+        <button onclick="client.loginWithRedirect({authorizationParams:{screen_hint:'signup'}})">Signup</button>
+        <button onclick="client.loginWithRedirect()">Login</button>
+    </div>
+
+    <!-- Install the Auth0 SPA SDK -->
+    <script src="/static/js/auth0-spa-js.production.js"></script>
+
+    <script src="/static/js/custom.js"></script>
+
+</body>
+</html>
