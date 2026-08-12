@@ -1,15 +1,24 @@
-package app
-
 import java.time.Instant
 import java.util.Base64
 
-import scala.util.{Try, Success, Failure}
-import scalasql.DbApi.Txn
-import scalasql.Sc
-import scalasql.Table
-import scalasql.MySqlDialect._
+// Vendor
+import cask.model.*
+
 import org.mariadb.jdbc.MariaDbDataSource
 import pdi.jwt.{JwtAlgorithm, JwtClaim, JwtUpickle}
+
+import scala.util.{Failure, Success, Try}
+import scalasql.DbApi.Txn
+import scalasql.Table
+import scalasql.MySqlDialect.*
+
+import ujson.Obj
+
+// Local
+import decorators.Transactional
+import entities.Product
+import services.RedisService
+import services.JWKSService
 
 class ProductRoutes()(
   implicit cc: castor.Context,
@@ -35,7 +44,7 @@ class ProductRoutes()(
 //  }
 
   @cask.get("/product/:id")
-  def getProduct(id: String) = {
+  def getProduct(id: String): Obj = {
     ujson.Obj(
       "id" -> id,
       "test-num" -> 123,
@@ -46,24 +55,43 @@ class ProductRoutes()(
     )
   }
 
+  @Transactional(Main.dbClient)
   @cask.postJson("/product")
-  def createProduct(request: cask.Request, name: ujson.Value, description: ujson.Value, price: ujson.Value, priceUnit: ujson.Value) = {
+  def createProduct(request: cask.Request, name: ujson.Value, description: ujson.Value, price: ujson.Value, priceUnit: ujson.Value)(txn: Txn): cask.Response[String] = {
     val token = request.headers.get("authorization").map(_.head) match {
       case Some(header: String) => header.split(" ").last
       case None => ""
     }
 
-    val jwkService = new JWKSService(new RedisService())
+    val jwkService = new JWKSService(Main.redisService)
     val userRoles = jwkService.fetchUserRoles(token)
 
-    ujson.Obj(
+    if (userRoles != "Customer") {
+      return cask.Response("Access denied", 401, Nil, Nil)
+    }
+
+    val body = request.text()
+    val result = txn.run(
+      Product
+        .insert
+        .columns(
+          _.name := name.str,
+          _.description := description.str,
+          _.price := price.str.toInt,
+          _.priceUnit := priceUnit.str,
+        )
+    )
+
+    cask.Response(
+      ujson.Obj(
+      "result" -> result,
       "userRoles" -> userRoles,
       "token" -> token,
       "_name" -> name,
       "_description" -> description,
       "_price" -> price,
       "_priceUnit" -> priceUnit
-    )
+    ).toString)
   }
 
   initialize()

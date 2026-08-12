@@ -1,4 +1,4 @@
-package app
+package services
 
 import java.security.cert.CertificateFactory
 import java.io.ByteArrayInputStream
@@ -61,7 +61,7 @@ class JWKSService(redisClient: RedisService) {
         findSecretInJson(kid, value)
 
       case Success(None) | Failure(_) =>
-        val newJWKS = getFromAuth0()
+        val newJWKS = getFromAuth0
         redisClient.store("jwks", newJWKS)
 
         findSecretInJson(kid, newJWKS)
@@ -79,7 +79,7 @@ class JWKSService(redisClient: RedisService) {
       }
   }
 
-  private def getFromAuth0() = {
+  private def getFromAuth0 = {
     val authUrl: String = sys.env.getOrElse("AUTH0_URL", "")
     printf("Auth0: %s", authUrl)
 

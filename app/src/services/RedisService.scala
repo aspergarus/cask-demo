@@ -1,4 +1,4 @@
-package app
+package services
 
 import redis.clients.jedis.{Jedis, JedisPool, JedisPoolConfig}
 import scala.util.Try
@@ -14,13 +14,13 @@ import scala.util.Using
 //  val port = sys.env.getOrElse("PORT", "8080")
 
 class RedisService {
-  val redisUrl: String = sys.env.getOrElse("REDIS_URL", "redis")
-  val redisPort: Int = sys.env.getOrElse("REDIS_PORT", "6379").toInt;
+  private val redisUrl: String = sys.env.getOrElse("REDIS_URL", "redis")
+  private val redisPort: Int = sys.env.getOrElse("REDIS_PORT", "6379").toInt;
 
-  val pool = new JedisPool(new JedisPoolConfig(), redisUrl, redisPort)
-  val cacheTTL = 600
+  private val pool = new JedisPool(new JedisPoolConfig(), redisUrl, redisPort)
+  private val cacheTTL = 600
 
-  def store(key: String, value: String) = {
+  def store(key: String, value: String): Try[String] = {
     Using(pool.getResource) { jedis =>
       jedis.setex(key, cacheTTL, value)
     }

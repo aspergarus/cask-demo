@@ -10,7 +10,7 @@ object app extends ScalaModule {
     mvn"ch.qos.logback:logback-classic:1.5.18",
     mvn"com.github.jwt-scala::jwt-upickle:11.0.4",
     mvn"com.lihaoyi::cask:0.11.3",
-    mvn"com.lihaoyi::scalasql:0.3.0",
+    mvn"com.lihaoyi::scalasql:0.3.1",
     mvn"com.softwaremill.sttp.client4::core:4.0.0-RC1",
     mvn"org.mariadb.jdbc:mariadb-java-client:3.5.10",
     mvn"org.postgresql:postgresql:42.6.0",

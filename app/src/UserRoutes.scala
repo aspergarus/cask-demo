@@ -1,12 +1,11 @@
-package app
-
 import java.time.Instant
 import scalasql.DbApi.Txn
 import scalasql.Sc
 import scalasql.Table
-import scalasql.MySqlDialect._
+import scalasql.MySqlDialect.*
 import org.mariadb.jdbc.MariaDbDataSource
 import pdi.jwt.{JwtAlgorithm, JwtClaim, JwtUpickle}
+import ujson.Obj
 
 case class UserRoutes()(
   implicit cc: castor.Context,
@@ -14,17 +13,17 @@ case class UserRoutes()(
 ) extends cask.Routes {
 
   @cask.get("/user/:userName") // variable path segment, e.g. HOST/user/lihaoyi
-  def getUserProfile(userName: String, segments: cask.RemainingPathSegments) = {
+  def getUserProfile(userName: String, segments: cask.RemainingPathSegments): String = {
     s"User ${userName.toUpperCase()}, ${segments.value}"
   }
 
   @cask.get("/user2/:userName") // allow unknown params, e.g. HOST/user2/foo?foo=bar&qux=baz
-  def getUserProfileAllowUnknown(userName: String, params: cask.QueryParams) = {
+  def getUserProfileAllowUnknown(userName: String, params: cask.QueryParams): String = {
     s"User $userName " + params.value.get("param")
   }
 
   @cask.get("/user-json")
-  def jsonEndpointObj() = {
+  def jsonEndpointObj(): Obj = {
     ujson.Obj(
       "test-num" -> 123,
       "test-bool" -> true,
@@ -35,7 +34,7 @@ case class UserRoutes()(
   }
 
   @cask.get("/jwt-test")
-  def JwtTest() = {
+  def JwtTest(): String = {
     val claim = JwtClaim(
       expiration = Some(Instant.now.plusSeconds(157784760).getEpochSecond),
       issuedAt = Some(Instant.now.getEpochSecond)

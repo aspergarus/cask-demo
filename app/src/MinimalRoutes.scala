@@ -1,57 +1,20 @@
-package app
-
+import cask.main.Routes
+import cask.model.Response.Raw
+import cask.router.Result
 import scalasql.DbApi.Txn
 import scalasql.Sc
 import scalasql.Table
-import scalasql.MySqlDialect._
+import scalasql.MySqlDialect.*
 import org.mariadb.jdbc.MariaDbDataSource
 
 case class MinimalRoutes()(
   implicit cc: castor.Context,
   log: cask.Logger
 ) extends cask.Routes {
-
-  val dataSource = new MariaDbDataSource;
-  dataSource.setUrl("jdbc:mariadb://mariadb:3306/common_db");
-  dataSource.setUser("regular");
-  dataSource.setPassword("mypassword");
-
-  lazy val mysqlClient = new scalasql.DbClient.DataSource(
-    dataSource,
-    config = new scalasql.Config {}
-  )
-
-  class transactional extends cask.RawDecorator{
-    def wrapFunction(pctx: cask.Request, delegate: Delegate) = {
-      mysqlClient.transaction { txn =>
-        val res = delegate(pctx, Map("txn" -> txn))
-        if (res.isInstanceOf[cask.router.Result.Error]) txn.rollback()
-        res
-      }
-    }
-  }
-
   case class Todo[T[_]](id: T[Int], checked: T[Boolean], text: T[String])
   object Todo extends scalasql.Table[Todo] {
     given todoRW: upickle.default.ReadWriter[Todo[Sc]] = upickle.default.macroRW[Todo[Sc]]
   }
-
-//  mysqlClient.getAutoCommitClientConnection.updateRaw(
-//    """
-//    CREATE TABLE IF NOT EXISTS todo (
-//      id INTEGER PRIMARY KEY AUTO_INCREMENT,
-//      checked BOOLEAN,
-//      text TEXT
-//    );
-//    """.stripMargin)
-//
-//
-//  mysqlClient.getAutoCommitClientConnection.updateRaw(
-//    """
-//    INSERT INTO todo (checked, text) VALUES
-//    (1, 'Get started with Cask'),
-//    (0, 'Profit!');
-//    """.stripMargin)
 
   @cask.get("/")
   def home(params: cask.QueryParams) = index(params)
@@ -123,11 +86,4 @@ case class MinimalRoutes()(
   }
 
   initialize()
-}
-
-object MinimalRoutesMain extends cask.Main {
-  override def port = 8080
-  override def host = "0.0.0.0"
-
-  val allRoutes = Seq(MinimalRoutes(), UserRoutes(), ProductRoutes())
 }
