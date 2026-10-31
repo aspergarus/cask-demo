@@ -26,16 +26,16 @@ const setTextContent = (id, content) => document.getElementById(id).textContent 
   }
 
   if (await window.client.isAuthenticated()) {
-    const user = await window.client.getUser();
-    console.log(user);
-    setTextContent("user-email", user.email);
-    setTextContent("user-profile", JSON.stringify(user, null, 2));
+    // const user = await window.client.getUser();
+    // setTextContent("user-email", user.email);
+    // setTextContent("user-profile", JSON.stringify(user, null, 2));
 
-    const accessToken = await client.getTokenSilently();
-    setTextContent("user-jwt", accessToken);
+    // const accessToken = await client.getTokenSilently();
+    // setTextContent("user-jwt", accessToken);
 
     const claims = await client.getIdTokenClaims();
-    setTextContent("user-claims", JSON.stringify(claims, null, 2));
+    // setTextContent("user-claims", JSON.stringify(claims, null, 2));
+    setTextContent("user-jwt", "Token: " + claims['__raw']);
 
 
     displayView("authenticated");

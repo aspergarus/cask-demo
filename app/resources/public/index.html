@@ -17,7 +17,10 @@
         <p>Logged in as <span id="user-email"></span></p>
         <h1>User Profile</h1>
         <pre id="user-profile"></pre>
-        <pre id="user-jwt"></pre>
+        <label>
+            Token:
+            <textarea id="user-jwt"></textarea>
+        </label>
         <pre id="user-claims"></pre>
         <button onclick="client.logout({logoutParams:{returnTo:location.origin}})">Logout</button>
     </div>
